@@ -1,0 +1,12 @@
+﻿global using BookStoreAPI.Data;
+global using BookStoreAPI.Models;
+global using BookStoreAPI.Data.EntityConfigurations;
+global using Microsoft.AspNetCore.Identity.UI.Services;
+global using Microsoft.AspNetCore.Identity;
+global using BookStoreAPI.Repositories;
+global using BookStoreAPI.Repositories.IRepositories;
+global using BookStoreAPI.Utilities;
+global using BookStoreAPI.Utilities.DBInitializer;
+global using BookStoreAPI.DTOs.Requests;
+global using BookStoreAPI.DTOs.Responses;
+global using Microsoft.AspNetCore.Mvc;
