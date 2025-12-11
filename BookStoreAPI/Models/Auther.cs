@@ -1,4 +1,6 @@
-﻿namespace BookStoreAPI.Models
+﻿using System.Text.Json.Serialization;
+
+namespace BookStoreAPI.Models
 {
     public class Author
     {
@@ -8,7 +10,10 @@
         public string Img { get; set; } = string.Empty;
 
         public List<string> Skills { get; set; } = new List<string>();
-        public ICollection<AuthorBook> Authorbooks { get; set; } = new List<AuthorBook>();
+
+        [JsonIgnore]
+        public ICollection<AuthorBook> AuthorBooks { get; set; } = new List<AuthorBook>();
+        [JsonIgnore]
 
         public ICollection<AuthorCategory> AuthorCategories { get; set; } = new List<AuthorCategory>();
     }

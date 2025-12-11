@@ -4,7 +4,6 @@ namespace BookStoreAPI.DTOs.Requests
 {
     public class LoginRequest
     {
-        public int Id { get; set; }
         public string EmailOrUserName { get; set; } = string.Empty;
 
         [DataType(DataType.Password)]

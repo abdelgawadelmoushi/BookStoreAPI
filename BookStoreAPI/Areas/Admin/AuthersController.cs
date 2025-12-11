@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace BookStoreAPI.Areas.Admin
 {
@@ -24,7 +25,7 @@ namespace BookStoreAPI.Areas.Admin
         public AuthorsController(IRepository<Book> booksRepository,
            IRepository<Category> categoryRepository
            , UserManager<ApplicationUser> userManager, IRepository<BookRating> ratingRepository
-            , IRepository<Book> bookRepository , IRepository<Author> authorRepository)
+            , IRepository<Book> bookRepository, IRepository<Author> authorRepository)
         {
             _booksRepository = booksRepository;
             _categoryRepository = categoryRepository;
@@ -34,70 +35,54 @@ namespace BookStoreAPI.Areas.Admin
         }
 
         [HttpPost("Get")]
-        public async Task<IActionResult> Get(AuthorFilterRequest AuthorFilterRequest)
+        public async Task<IActionResult> Get([FromBody] AuthorFilterRequest authorFilterRequest)
         {
             var authors = await _authorRepository.GetAsync(tracked: false);
-
             AuthorCreateRequest authorFilterResponse = new();
 
-            // Add Filter
-            if (AuthorFilterRequest.Name is not null)
+            if (!string.IsNullOrWhiteSpace(authorFilterRequest.Name))
             {
-                var AuthorsNameTrimmed = AuthorFilterRequest.Name.Trim();
-
-                authors = authors.Where(e => e.Name.Contains(AuthorsNameTrimmed));
-                authorFilterResponse.Name = AuthorFilterRequest.Name;
+                var trimmedName = authorFilterRequest.Name.Trim();
+                authors = authors.Where(a => a.Name.Contains(trimmedName));
+                authorFilterResponse.Name = authorFilterRequest.Name;
             }
 
-            // Fix: Filter by Age (assume AuthorFilterRequest.Age is int? and Author.Age is int)
-            if (AuthorFilterRequest.Age != null)
+            if (authorFilterRequest.Age.HasValue)
             {
-                authors = authors.Where(e => e.Age == AuthorFilterRequest.Age.Value);
-                authorFilterResponse.Age = AuthorFilterRequest.Age.Value;
+                authors = authors.Where(a => a.Age == authorFilterRequest.Age.Value);
+                authorFilterResponse.Age = authorFilterRequest.Age.Value;
             }
 
-            if (AuthorFilterRequest.Skills != null)
+            if (authorFilterRequest.Skills != null && authorFilterRequest.Skills.Any())
             {
-                authors = authors.Where(e => e.Skills == AuthorFilterRequest.Skills);
-            }
-
-
-            if (AuthorFilterRequest.AuthorCategories is not null)
-            {
-                authors = authors.Where(e => e.AuthorCategories == AuthorFilterRequest.AuthorCategories);
-                authorFilterResponse.AuthorCategories = AuthorFilterRequest.AuthorCategories;
-            }
-            if (AuthorFilterRequest.Authorbooks is not null)
-            {
-                authors = authors.Where(e => e.Authorbooks == AuthorFilterRequest.Authorbooks);
-                authorFilterResponse.Authorbooks = AuthorFilterRequest.Authorbooks;
+                authors = authors.Where(a => a.Skills.Any(s => authorFilterRequest.Skills.Contains(s)));
+                authorFilterResponse.Skills = authorFilterRequest.Skills;
             }
 
 
-            // Add Pagination
-            var totalNumberOfPages = Math.Ceiling(authors.Count() / 8.0);
+            int pageSize = 8;
+            var totalNumberOfPages = Math.Ceiling(authors.Count() / (double)pageSize);
             authorFilterResponse.TotalNumberOfPages = totalNumberOfPages;
-            authorFilterResponse.CurrentPage = AuthorFilterRequest.page;
+            authorFilterResponse.CurrentPage = authorFilterRequest.page;
 
-            authors = authors.Skip((AuthorFilterRequest.page - 1) * 8).Take(8);
+            authors = authors.Skip((authorFilterRequest.page - 1) * pageSize)
+                             .Take(pageSize);
 
             return Ok(new
             {
-                Books = authors,
-                BookFilter = authorFilterResponse
+                Authors = authors,
+                AuthorFilter = authorFilterResponse
             });
         }
 
         [HttpPost("")]
         public async Task<IActionResult> Create([FromForm] AuthorCreateRequest authorCreateRequest)
         {
-            var Authors = authorCreateRequest.Adapt<Book>();
+            var author = authorCreateRequest.Adapt<Author>();
 
             if (authorCreateRequest.Img is not null && authorCreateRequest.Img.Length > 0)
             {
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(authorCreateRequest.Img.FileName);
-
-                // Save Img in wwwroot
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images\\Author_images", fileName);
 
                 using (var stream = System.IO.File.Create(filePath))
@@ -105,46 +90,21 @@ namespace BookStoreAPI.Areas.Admin
                     authorCreateRequest.Img.CopyTo(stream);
                 }
 
-                // Save Img in Db
-                Authors.MainImg = fileName;
+                author.Img = fileName;
             }
 
-            await _booksRepository.CreateAsync(Authors);
-            await _booksRepository.CommitAsync();
+           
 
-            #region  forSubIMG if required
-            //if (booksCreateRequest.SubImgs is not null && booksCreateRequest.SubImgs.Count > 0)
-            //{
-            //    foreach (var item in booksCreateRequest.SubImgs)
-            //    {
-            //        // Save Img in wwwroot
-            //        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(item.FileName);
 
-            //        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images\\books_images\\books_sub_images", fileName);
+            await _authorRepository.CreateAsync(author);
+            await _authorRepository.CommitAsync();
 
-            //        using (var stream = System.IO.File.Create(filePath))
-            //        {
-            //            item.CopyTo(stream);
-            //        }
-
-            //        // Save Img in Db
-            //        await _booksSubImageRepository.CreateAsync(new()
-            //        {
-            //            Img = fileName,
-            //            BookId = books.Id
-            //        });
-            //    }
-
-            //    await _booksSubImageRepository.CommitAsync();
-            //}
-
-            #endregion
-
-            return CreatedAtAction(nameof(GetOne), new { id = Authors.Id }, new SuccessModel
+            return CreatedAtAction(nameof(GetOne), new { id = author.Id }, new SuccessModel
             {
-                Message = "Add Book Successfully"
+                Message = "Author Added Successfully"
             });
         }
+
         [HttpGet("MyRating")]
         public async Task<IActionResult> GetMyRating(int bookId)
         {
@@ -156,10 +116,8 @@ namespace BookStoreAPI.Areas.Admin
             if (rating is null)
                 return Ok(new { Value = 0 });
 
-
             return Ok(new { Value = rating.Value });
         }
-
 
         [HttpPost("Rate")]
         public async Task<IActionResult> RateBook(int bookId, byte value)
@@ -180,7 +138,6 @@ namespace BookStoreAPI.Areas.Admin
 
             if (existingRating is null)
             {
-                // Add new
                 await _ratingRepository.CreateAsync(new BookRating
                 {
                     BookId = bookId,
@@ -190,7 +147,6 @@ namespace BookStoreAPI.Areas.Admin
             }
             else
             {
-                // Update rating
                 existingRating.Value = value;
             }
 
@@ -205,103 +161,58 @@ namespace BookStoreAPI.Areas.Admin
         {
             var books = await _booksRepository.GetOneAsync(e => e.Id == id, tracked: false);
 
-            //var booksSubImages = await _booksSubImageRepository.GetAsync(e => e.BookId == id, tracked: false);
-
             return Ok(new
             {
-                Book = books,
-                //BookSubImages = booksSubImages
+                Book = books
             });
         }
 
         [HttpPut("{id}")]
         [Authorize(Roles = $"{SD.Super_Admin_Role},{SD.Admin_Role}")]
-        public async Task<IActionResult> Edit(int id, [FromForm] AuthorUpdateRequest authorUpdateRequest)
+        public async Task<IActionResult> Edit(int id, [FromForm] AuthorUpdateRequest request)
         {
-            var AuthorsInDb = await _authorRepository.GetOneAsync(e => e.Id == id);
+            var authorInDb = await _authorRepository
+                .GetOneAsync(e => e.Id == id, includes: new System.Linq.Expressions.Expression<Func<Author, object>>[] { e => e.AuthorCategories, e => e.AuthorBooks });
 
-            if (AuthorsInDb is null) return NotFound();
+            if (authorInDb is null)
+                return NotFound();
 
-            if (authorUpdateRequest.Img is not null && authorUpdateRequest.Img.Length > 0)
+            if (request.Img is not null && request.Img.Length > 0)
             {
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(authorUpdateRequest.Img.FileName);
-
-                // Save Img in wwwroot
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images\\Author_images", fileName);
+                var fileName = Guid.NewGuid() + Path.GetExtension(request.Img.FileName);
+                var filePath = Path.Combine("wwwroot/images/Author_images", fileName);
 
                 using (var stream = System.IO.File.Create(filePath))
-                {
-                    authorUpdateRequest.Img.CopyTo(stream);
-                }
+                    request.Img.CopyTo(stream);
 
-                // Delete Old Img from wwwroot
-                var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images\\Author_images", AuthorsInDb.Img);
-
+                var oldFilePath = Path.Combine("wwwroot/images/Author_images", authorInDb.Img);
                 if (System.IO.File.Exists(oldFilePath))
-                {
                     System.IO.File.Delete(oldFilePath);
-                }
 
-                // Save Img in Db
-                AuthorsInDb.Img = fileName;
+                authorInDb.Img = fileName;
             }
 
-            AuthorsInDb.Name = authorUpdateRequest.Name;
-            AuthorsInDb.Age = authorUpdateRequest.Age;
-            AuthorsInDb.AuthorCategories = authorUpdateRequest.AuthorCategories;
-            AuthorsInDb.Authorbooks = authorUpdateRequest.Authorbooks;
-            AuthorsInDb.Skills = authorUpdateRequest.Skills;
+            authorInDb.Name = request.Name;
+            authorInDb.Age = request.Age;
+            authorInDb.Skills = request.Skills;
 
-            #region forSubIMG if required
+            if (request.CategoryIds != null)
+            {
+                authorInDb.AuthorCategories.Clear();
+                foreach (var catId in request.CategoryIds)
+                {
+                    authorInDb.AuthorCategories.Add(new AuthorCategory { CategoryId = catId });
+                }
+            }
 
-            //if (authorUpdateRequest.SubImgs is not null && authorUpdateRequest.SubImgs.Count > 0)
-            //{
-            //    // Delete Old sub imgs from wwwroot & Db
-            //    var booksSubImages = await _booksSubImageRepository.GetAsync(e => e.BookId == id);
-
-            //    List<BookSubImages> listOfBookSubImages = [];
-            //    foreach (var item in booksSubImages)
-            //    {
-            //        var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images\\brand_images", item.Img);
-
-            //        if (System.IO.File.Exists(oldFilePath))
-            //        {
-            //            System.IO.File.Delete(oldFilePath);
-            //        }
-
-            //        listOfBookSubImages.Add(item);
-            //    }
-
-            //    _booksSubImageRepository.RemoveRange(listOfBookSubImages);
-            //    await _booksSubImageRepository.CommitAsync();
-
-            //    // Create & Save New sub imgs
-            //    List<BookSubImages> listOfNewBookSubImages = [];
-            //    foreach (var item in authorUpdateRequest.SubImgs)
-            //    {
-            //        // Save Img in wwwroot
-            //        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(item.FileName);
-
-            //        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images\\books_images\\books_sub_images", fileName);
-
-            //        using (var stream = System.IO.File.Create(filePath))
-            //        {
-            //            item.CopyTo(stream);
-            //        }
-
-            //        // Save Img in Db
-            //        listOfNewBookSubImages.Add(new()
-            //        {
-            //            Img = fileName,
-            //            BookId = id
-            //        });
-            //    }
-
-            //    await _booksSubImageRepository.AddRangeAsync(listOfNewBookSubImages);
-            //    await _booksSubImageRepository.CommitAsync();
-            //}
-            #endregion
-
+            if (request.BookIds != null)
+            {
+                authorInDb.AuthorBooks.Clear();
+                foreach (var bookId in request.BookIds)
+                {
+                    authorInDb.AuthorBooks.Add(new AuthorBook { BookId = bookId });
+                }
+            }
 
             await _authorRepository.CommitAsync();
             return NoContent();
@@ -315,34 +226,11 @@ namespace BookStoreAPI.Areas.Admin
 
             if (Authors is null) return NotFound();
 
-            // Delete Old Img from wwwroot
             var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images\\Author_images", Authors.Img);
-
             if (System.IO.File.Exists(oldFilePath))
             {
                 System.IO.File.Delete(oldFilePath);
             }
-            #region forSubIMG if required
-            // Delete Old sub imgs from wwwroot & Db
-            //var authorSubImages = await _authorSubImageRepository.GetAsync(e => e.AuthorId == Authors.Id);
-
-            //List<BookSubImages> listOfBookSubImages = [];
-            //foreach (var item in booksSubImages)
-            //{
-            //    var oldSubImgFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images\\books_images\\books_sub_images", item.Img);
-
-            //    if (System.IO.File.Exists(oldSubImgFilePath))
-            //    {
-            //        System.IO.File.Delete(oldSubImgFilePath);
-            //    }
-
-            //    listOfBookSubImages.Add(item);
-            //}
-
-            //_booksSubImageRepository.RemoveRange(listOfBookSubImages);
-            //await _booksSubImageRepository.CommitAsync();
-
-            #endregion
 
             _authorRepository.Delete(Authors);
             await _authorRepository.CommitAsync();

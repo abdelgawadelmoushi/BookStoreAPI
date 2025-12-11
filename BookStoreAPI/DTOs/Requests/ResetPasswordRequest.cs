@@ -4,7 +4,6 @@ namespace BookStoreAPI.DTOs.Requests
 {
     public class ResetPasswordRequest
     {
-        public int Id { get; set; }
 
         [Required, DataType(DataType.Password)]
         public String Password { get; set; } = string.Empty;
