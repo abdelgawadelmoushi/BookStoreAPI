@@ -1,6 +1,6 @@
 ﻿namespace BookStoreAPI.DTOs.Requests
 {
-    public class BookUpdateRequest
+    public class BooksUpdateRequest
     {
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }

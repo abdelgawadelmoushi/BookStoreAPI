@@ -18,20 +18,18 @@ namespace BookStoreAPI.Areas.Admin
         private readonly IBookSubImagesRepository _booksSubImageRepository;
         private readonly IRepository<Category> _categoryRepository;
         private readonly IRepository<BookRating> _ratingRepository;
-        private readonly IRepository<Book> _bookRepository;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public BooksController(IRepository<Book> booksRepository,
             IBookSubImagesRepository booksSubImageRepository, IRepository<Category> categoryRepository
            , UserManager<ApplicationUser> userManager, IRepository<BookRating> ratingRepository
-            , IRepository<Book> bookRepository)
+          )
         {
             _booksRepository = booksRepository;
             _booksSubImageRepository = booksSubImageRepository;
             _categoryRepository = categoryRepository;
             _userManager = userManager;
             _ratingRepository = ratingRepository;
-            _bookRepository = bookRepository;
         }
 
         [HttpPost("Get")]
@@ -182,7 +180,7 @@ namespace BookStoreAPI.Areas.Admin
             if (user is null)
                 return Unauthorized();
 
-            var book = await _bookRepository.GetOneAsync(e => e.Id == bookId);
+            var book = await _booksRepository.GetOneAsync(e => e.Id == bookId);
             if (book is null)
                 return NotFound("Book not found");
 
@@ -227,7 +225,7 @@ namespace BookStoreAPI.Areas.Admin
 
         [HttpPut("{id}")]
         [Authorize(Roles = $"{SD.Super_Admin_Role},{SD.Admin_Role}")]
-        public async Task<IActionResult> Edit(int id, [FromForm] BookUpdateRequest booksUpdateRequest)
+        public async Task<IActionResult> Edit(int id, [FromForm] BooksUpdateRequest booksUpdateRequest)
         {
             var booksInDb = await _booksRepository.GetOneAsync(e => e.Id == id);
 
