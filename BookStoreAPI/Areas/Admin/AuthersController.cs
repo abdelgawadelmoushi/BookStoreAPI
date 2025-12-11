@@ -172,7 +172,7 @@ namespace BookStoreAPI.Areas.Admin
         public async Task<IActionResult> Edit(int id, [FromForm] AuthorUpdateRequest request)
         {
             var authorInDb = await _authorRepository
-                .GetOneAsync(e => e.Id == id, includes: new System.Linq.Expressions.Expression<Func<Author, object>>[] { e => e.AuthorCategories, e => e.AuthorBooks });
+                .GetOneAsync(e => e.Id == id, includes: new System.Linq.Expressions.Expression<Func<Author, object>>[] { e => e.AuthorCategories, e => e.AuthorCategories });
 
             if (authorInDb is null)
                 return NotFound();
@@ -205,14 +205,7 @@ namespace BookStoreAPI.Areas.Admin
                 }
             }
 
-            if (request.BookIds != null)
-            {
-                authorInDb.AuthorBooks.Clear();
-                foreach (var bookId in request.BookIds)
-                {
-                    authorInDb.AuthorBooks.Add(new AuthorBook { BookId = bookId });
-                }
-            }
+        
 
             await _authorRepository.CommitAsync();
             return NoContent();

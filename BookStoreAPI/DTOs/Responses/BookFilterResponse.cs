@@ -9,6 +9,7 @@
         public bool Status { get; set; }
         public int? CategoryId { get; set; }
         public int? BrandId { get; set; }
+        public int? AuthorId { get; set; }
         public int CurrentPage { get; set; }
         public DateTime? CreatedAt { get; set; }
 

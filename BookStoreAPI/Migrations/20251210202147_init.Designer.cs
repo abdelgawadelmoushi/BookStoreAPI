@@ -180,7 +180,6 @@ namespace BookStoreAPI.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.ToTable("Authorbooks");
                 });
 
             modelBuilder.Entity("BookStoreAPI.Models.AuthorCategory", b =>
@@ -566,24 +565,7 @@ namespace BookStoreAPI.Migrations
                         .HasForeignKey("BookId");
                 });
 
-            modelBuilder.Entity("BookStoreAPI.Models.AuthorBook", b =>
-                {
-                    b.HasOne("BookStoreAPI.Models.Author", "Author")
-                        .WithMany("Authorbooks")
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BookStoreAPI.Models.Book", "Book")
-                        .WithMany("Authorbooks")
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Author");
-
-                    b.Navigation("Book");
-                });
+         
 
             modelBuilder.Entity("BookStoreAPI.Models.AuthorCategory", b =>
                 {
@@ -726,12 +708,10 @@ namespace BookStoreAPI.Migrations
                 {
                     b.Navigation("AuthorCategories");
 
-                    b.Navigation("Authorbooks");
                 });
 
             modelBuilder.Entity("BookStoreAPI.Models.Book", b =>
                 {
-                    b.Navigation("Authorbooks");
 
                     b.Navigation("Authors");
 

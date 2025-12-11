@@ -83,7 +83,11 @@ namespace BookStoreAPI.Areas.Admin
                 bookss = bookss.Where(e => e.CategoryId == booksFilterRequest.categoryId);
                 booksFilterResponse.CategoryId = booksFilterRequest.categoryId;
             }
-
+            if (booksFilterRequest.AuthorId is not null)
+            {
+                bookss = bookss.Where(e => e.AuthorId == booksFilterRequest.AuthorId);
+                booksFilterResponse.AuthorId = booksFilterRequest.AuthorId;
+            }
 
 
             // Add Pagination

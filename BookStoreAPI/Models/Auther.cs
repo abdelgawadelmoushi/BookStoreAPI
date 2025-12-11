@@ -11,9 +11,7 @@ namespace BookStoreAPI.Models
 
         public List<string> Skills { get; set; } = new List<string>();
 
-        [JsonIgnore]
-        public ICollection<AuthorBook> AuthorBooks { get; set; } = new List<AuthorBook>();
-        [JsonIgnore]
+     
 
         public ICollection<AuthorCategory> AuthorCategories { get; set; } = new List<AuthorCategory>();
     }

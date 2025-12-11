@@ -49,7 +49,6 @@ namespace BookStoreAPI
             // i used a geniric Repository as below 
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             builder.Services.AddScoped<IBookSubImagesRepository, BookSubImagesRepository>();
-            builder.Services.AddScoped<IAuthorBookRepository, AuthorBookRepository>();
             builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IDBInitializer, DBInitializer>();
 

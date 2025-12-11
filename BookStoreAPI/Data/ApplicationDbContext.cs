@@ -13,7 +13,6 @@ namespace BookStoreAPI.Data
         public DbSet<Book> books { get; set; }
         public DbSet<Author> Authors { get; set; }
         public DbSet<BookSubImages> BookSubImages { get; set; }
-        public DbSet<AuthorBook> Authorbooks { get; set; }
         public DbSet<ApplicationUserOTP> ApplicationUserOTPs { get; set; }
         public DbSet<Cart> Carts { get; set; }
         public DbSet<BookRating> bookRatings { get; set; }
@@ -33,7 +32,6 @@ namespace BookStoreAPI.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(EntityConfigurations.AuthorBookEntityTypeConfiguration).Assembly);
 
             base.OnModelCreating(modelBuilder);
 

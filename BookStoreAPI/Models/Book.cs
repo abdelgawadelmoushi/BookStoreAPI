@@ -3,6 +3,8 @@
     public class Book
     {
         public int Id { get; set; }
+        public int AuthorId { get; set; }
+        public Author Author { get; set; }
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string MainImg { get; set; } = string.Empty;
@@ -25,7 +27,6 @@
         
      
 
-        public ICollection<AuthorBook> Authorbooks { get; set; } = new List<AuthorBook>();
         public ICollection<BookRating> Ratings { get; set; } = new List<BookRating>();
 
     }

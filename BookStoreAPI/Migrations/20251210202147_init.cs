@@ -352,31 +352,7 @@ namespace BookStoreAPI.Migrations
                         principalColumn: "Id");
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Authorbooks",
-                columns: table => new
-                {
-                    AuthorId = table.Column<int>(type: "int", nullable: false),
-                    BookId = table.Column<int>(type: "int", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Authorbooks", x => new { x.BookId, x.AuthorId });
-                    table.ForeignKey(
-                        name: "FK_Authorbooks_Authors_AuthorId",
-                        column: x => x.AuthorId,
-                        principalTable: "Authors",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Authorbooks_books_BookId",
-                        column: x => x.BookId,
-                        principalTable: "books",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
+           
             migrationBuilder.CreateTable(
                 name: "AuthorCategory",
                 columns: table => new
@@ -447,10 +423,7 @@ namespace BookStoreAPI.Migrations
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Authorbooks_AuthorId",
-                table: "Authorbooks",
-                column: "AuthorId");
+         
 
             migrationBuilder.CreateIndex(
                 name: "IX_AuthorCategory_AuthorId",
@@ -519,8 +492,7 @@ namespace BookStoreAPI.Migrations
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
 
-            migrationBuilder.DropTable(
-                name: "Authorbooks");
+          
 
             migrationBuilder.DropTable(
                 name: "AuthorCategory");
