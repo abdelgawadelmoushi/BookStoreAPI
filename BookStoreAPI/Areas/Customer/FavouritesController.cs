@@ -32,8 +32,8 @@ namespace BookStoreAPI.Areas.Customer
         }
 
 
-        [HttpPut("AddToFavouite")]
-        public async Task<IActionResult> AddToFavouite(int bookId, int count)
+        [HttpPut("CheckOut")]
+        public async Task<IActionResult> CheckOut(int bookId, int count)
         {
             var user = await _userManager.GetUserAsync(User);
 
@@ -63,6 +63,46 @@ namespace BookStoreAPI.Areas.Customer
             }
 
             await _favouriteRepository.CommitAsync();
+
+            return NoContent();
+        }
+
+        [HttpGet("IncrementCount")]
+        public async Task<IActionResult> IncrementCount(int bookId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user is null)
+                return NotFound();
+
+            var cartInDb = await _cartRepository.GetOneAsync(e => e.ApplicationUserId == user.Id && e.BookId == bookId);
+
+            if (cartInDb is null)
+                return NotFound();
+
+            cartInDb.Count += 1;
+            await _cartRepository.CommitAsync();
+
+            return NoContent();
+        }
+        [HttpGet("DecrementCount")]
+        public async Task<IActionResult> DecrementCount(int bookId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user is null)
+                return NotFound();
+
+            var cartInDb = await _cartRepository.GetOneAsync(e => e.ApplicationUserId == user.Id && e.BookId == bookId);
+
+            if (cartInDb is null)
+                return NotFound();
+
+            if (cartInDb.Count > 1)
+            {
+                cartInDb.Count -= 1;
+                await _cartRepository.CommitAsync();
+            }
 
             return NoContent();
         }
