@@ -1,4 +1,4 @@
-
+Ôªøusing BookStoreAPI.Areas.Admin;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -8,45 +8,33 @@ namespace BookStoreAPI
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
-
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("ConnectionString" +
-                "Default Connection not found.");
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                                   ?? throw new InvalidOperationException("ConnectionString Default Connection not found.");
             builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
-
-
-
-            //»‰ÿ·» „‰ ”Ì ‘«—»  ÷Ì›·‰« ‰ÿ«ﬁ ÃœÌœ «Ê· „«   ‘Ê› «·‰Ê⁄ «··Ì Ã«Ì·Â«  ÷Ì› «Ê»ÃÌﬂ  „‰ ‰›” «·‰Ê⁄
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
                 options.User.RequireUniqueEmail = true;
                 options.Password.RequiredLength = 8;
                 options.Password.RequireNonAlphanumeric = false;
-                //options.SignIn.RequireConfirmedEmail = false;
-
             })
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
+
             builder.Services.ConfigureApplicationCookie(options =>
             {
-                options.LoginPath = "/Identity/Account/Login"; // Specifies the path to your login page
-                options.AccessDeniedPath = "/Identity/Account/AccessDenied"; // Optional: for unauthorized access
-                options.ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter; // Default parameter for return URL
+                options.LoginPath = "/Identity/Account/Login";
+                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+                options.ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter;
             });
-            //instead of 
-            //builder.Services.AddScoped<IRepository<ApplicationUserOTP>, Repository<ApplicationUserOTP>>();
 
-            // i used a geniric Repository as below 
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             builder.Services.AddScoped<IBookSubImagesRepository, BookSubImagesRepository>();
             builder.Services.AddTransient<IEmailSender, EmailSender>();
@@ -57,14 +45,13 @@ namespace BookStoreAPI
 
             var app = builder.Build();
 
+            // ‚úÖ ÿßÿ≥ÿ™ÿØÿπÿßÿ° ÿßŸÑŸÄ Initializer ÿ®ÿ¥ŸÉŸÑ ÿµÿ≠Ÿäÿ≠
             using (var scope = app.Services.CreateScope())
             {
                 var initializer = scope.ServiceProvider.GetRequiredService<IDBInitializer>();
-                initializer.Initialize();
-
+                await initializer.InitializeAsync();
             }
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
             {
                 app.MapOpenApi();
@@ -72,12 +59,10 @@ namespace BookStoreAPI
             }
 
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
-
             app.MapControllers();
 
+            //app.ConfigureAuthersAPI();
             app.Run();
         }
     }

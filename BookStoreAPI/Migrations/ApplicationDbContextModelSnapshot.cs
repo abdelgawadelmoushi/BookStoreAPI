@@ -126,7 +126,7 @@ namespace BookStoreAPI.Migrations
 
                     b.HasIndex("ApplicationUserId");
 
-                    b.ToTable("ApplicationUserOTPs");
+                    b.ToTable("ApplicationUserOTPs", (string)null);
                 });
 
             modelBuilder.Entity("BookStoreAPI.Models.Author", b =>
@@ -159,10 +159,26 @@ namespace BookStoreAPI.Migrations
 
                     b.HasIndex("BookId");
 
-                    b.ToTable("Authors");
+                    b.ToTable("Authors", (string)null);
                 });
 
-       
+            modelBuilder.Entity("BookStoreAPI.Models.AuthorBook", b =>
+                {
+                    b.Property<int>("BookId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AuthorId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.HasKey("BookId", "AuthorId");
+
+                    b.HasIndex("AuthorId");
+
+                    b.ToTable("AuthorBook");
+                });
 
             modelBuilder.Entity("BookStoreAPI.Models.AuthorCategory", b =>
                 {
@@ -184,7 +200,7 @@ namespace BookStoreAPI.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("AuthorCategory");
+                    b.ToTable("AuthorCategory", (string)null);
                 });
 
             modelBuilder.Entity("BookStoreAPI.Models.Book", b =>
@@ -236,7 +252,7 @@ namespace BookStoreAPI.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("books");
+                    b.ToTable("books", (string)null);
                 });
 
             modelBuilder.Entity("BookStoreAPI.Models.BookRating", b =>
@@ -260,7 +276,7 @@ namespace BookStoreAPI.Migrations
 
                     b.HasIndex("ApplicationUserId");
 
-                    b.ToTable("bookRatings");
+                    b.ToTable("bookRatings", (string)null);
                 });
 
             modelBuilder.Entity("BookStoreAPI.Models.BookSubImages", b =>
@@ -276,7 +292,7 @@ namespace BookStoreAPI.Migrations
 
                     b.HasKey("BookId", "Img");
 
-                    b.ToTable("BookSubImages");
+                    b.ToTable("BookSubImages", (string)null);
                 });
 
             modelBuilder.Entity("BookStoreAPI.Models.Cart", b =>
@@ -307,7 +323,7 @@ namespace BookStoreAPI.Migrations
 
                     b.HasIndex("BookId");
 
-                    b.ToTable("Carts");
+                    b.ToTable("Carts", (string)null);
                 });
 
             modelBuilder.Entity("BookStoreAPI.Models.Category", b =>
@@ -330,7 +346,7 @@ namespace BookStoreAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("BookStoreAPI.Models.Favourite", b =>
@@ -360,7 +376,7 @@ namespace BookStoreAPI.Migrations
 
                     b.HasIndex("BookId");
 
-                    b.ToTable("favourites");
+                    b.ToTable("favourites", (string)null);
                 });
 
             modelBuilder.Entity("BookStoreAPI.Models.Order", b =>
@@ -407,7 +423,7 @@ namespace BookStoreAPI.Migrations
 
                     b.HasIndex("ApplicationUserId");
 
-                    b.ToTable("orders");
+                    b.ToTable("orders", (string)null);
                 });
 
             modelBuilder.Entity("BookStoreAPI.Models.Promotion", b =>
@@ -450,7 +466,7 @@ namespace BookStoreAPI.Migrations
 
                     b.HasIndex("BookId");
 
-                    b.ToTable("Promotions");
+                    b.ToTable("Promotions", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -782,12 +798,10 @@ namespace BookStoreAPI.Migrations
             modelBuilder.Entity("BookStoreAPI.Models.Author", b =>
                 {
                     b.Navigation("AuthorCategories");
-
                 });
 
             modelBuilder.Entity("BookStoreAPI.Models.Book", b =>
                 {
-
                     b.Navigation("Authors");
 
                     b.Navigation("BookSubImages");

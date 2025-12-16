@@ -8,6 +8,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.11" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.10" />
 	</ItemGroup>
 
@@ -30,6 +31,7 @@
 
 	<ItemGroup>
 		<Folder Include="Areas\ChatApp\" />
+		<Folder Include="Controllers\" />
 		<Folder Include="wwwroot\assets\customer\" />
 		<Folder Include="wwwroot\img\brand_Images\" />
 		<Folder Include="wwwroot\img\customer\" />

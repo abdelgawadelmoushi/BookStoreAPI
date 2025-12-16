@@ -1,8 +1,9 @@
-﻿namespace BookStoreAPI.Utilities.DBInitializer
+﻿using System.Threading.Tasks;
+
+namespace BookStoreAPI.Utilities.DBInitializer
 {
     public interface IDBInitializer
     {
-
-        void Initialize();
+        Task InitializeAsync();
     }
 }

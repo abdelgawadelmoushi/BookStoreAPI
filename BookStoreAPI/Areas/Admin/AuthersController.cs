@@ -11,7 +11,6 @@ namespace BookStoreAPI.Areas.Admin
 {
     [Route("api/[area]/[controller]")]
     [ApiController]
-    [Authorize(Roles = $"{SD.Super_Admin_Role},{SD.Admin_Role},{SD.Employee_Role}")]
     [Area("Admin")]
     public class AuthorsController : ControllerBase
     {

@@ -19,6 +19,7 @@ namespace BookStoreAPI.Data
         public DbSet<Promotion> Promotions { get; set; }
         public DbSet<Order> orders { get; set; }
         public DbSet<Favourite> favourites { get; set; }
+        public DbSet<BookRating> BookRatings { get; set; }
 
 
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

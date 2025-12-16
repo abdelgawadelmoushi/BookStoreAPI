@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Http;
 
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace BookStoreAPI.Areas.Identity
 {
@@ -101,6 +103,9 @@ namespace BookStoreAPI.Areas.Identity
             var user = await _userManager.FindByEmailAsync(loginRequest.EmailOrUserName) ?? await _userManager.FindByNameAsync(loginRequest.EmailOrUserName);
             if (user is null)
 
+                //var token = GenerateJwtToken(user);
+          
+
             {
                 return BadRequest(new ErrorModel
                 {
@@ -155,6 +160,20 @@ namespace BookStoreAPI.Areas.Identity
 
         }
 
+        //private string GenerateJwtToken(ApplicationUser user)
+        //{
+
+        //    var token = new JwtSecurityToken(
+        //    issuer: "yourdomain.com",
+        //    audience: "yourdomain.com",
+        //    claims: claims,
+        //    expires: DateTime.Now.AddMinutes(30),
+        //    signingCredentials: creds);
+
+        //    return new JwtSecurityTokenHandler().WriteToken(token);
+        //}
+        
+        
 
         [HttpPost("ResendEmailConfirmation")]
         public async Task<IActionResult> ResendEmailConfirmation(ResendEmailConfirmationRequest resendEmailConfirmationRequest)
